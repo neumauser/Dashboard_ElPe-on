@@ -259,15 +259,8 @@ def make_combined_bar_line(x, y_bar, y_line, x_labels=None, height=460):
             marker_color=COLORS['bar'],
             marker_line=dict(width=0),
             text=[f"{int(v):,}" if not np.isnan(v) else "" for v in y_bar],
-            textposition="inside" if show_labels else "none",
-            textfont=dict(
-                family="Arial Black",  # fuente gruesa
-                size=14,
-                color="black"
-            ),
-            insidetextfont=dict(color="black"),
-            outsidetextfont=dict(color="black"),
-            bgcolor="white"
+            textposition="outside" if show_labels else "none",
+            textfont=dict(color=COLORS['text'])
         ),
         secondary_y=False
     )
@@ -281,16 +274,7 @@ def make_combined_bar_line(x, y_bar, y_line, x_labels=None, height=460):
             mode="lines+markers" if not show_labels else "lines+markers+text",
             text=[f"{v:,.0f}" if not np.isnan(v) else "" for v in y_line],
             textposition="top center",
-            textfont=dict(
-                family="Arial Black",  # fuente gruesa
-                size=14,
-                color="black"
-            ),
-            insidetextfont=dict(color="black"),
-            outsidetextfont=dict(color="black"),
-            bgcolor="white",
-            line=dict(color=COLORS['line'], width=3, shape="spline", smoothing=0.6),
-            marker=dict(size=10, color=COLORS['line'], line=dict(width=2, color="white")),
+            textfont=dict(color=COLORS['text'])
         ),
         secondary_y=True
     )
@@ -316,11 +300,7 @@ with c1:
         x=g1.index,
         y_bar=g1["nro_casos"].values,
         y_line=g1["prom_hrs"].values,
-        x_labels=[month_names.get(i, i) for i in g1.index],
-        ymax_left = max(y_bar) * 1.1 if len(y_bar) else 1,
-        ymax_right = max(y_line) * 1.1 if len(y_line) else 1
-        fig.update_yaxes(range=[0, ymax_left], secondary_y=False),
-        fig.update_yaxes(range=[0, ymax_right], secondary_y=True),
+        x_labels=[month_names.get(i, i) for i in g1.index]
     )
     st.plotly_chart(fig1, use_container_width=True)
 
