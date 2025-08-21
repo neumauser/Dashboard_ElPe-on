@@ -190,7 +190,12 @@ total_bajas = len(fdf)
 horas_prom = fdf["HORAS"].mean() if "HORAS" in fdf.columns else np.nan
 goma_rem = fdf["% GOMA REMANENTE"].mean() 
 if "% GOMA REMANENTE" in fdf.columns and len(fdf) > 0:
-    goma_rem = fdf["% GOMA REMANENTE"].sum() / len(fdf)
+    # convertir a número (quita % y transforma en decimal si es texto)
+    vals = pd.to_numeric(
+        fdf["% GOMA REMANENTE"].astype(str).str.replace("%", "").str.strip(),
+        errors="coerce"
+    )
+    goma_rem = vals.sum() / len(fdf)   # suma / total filas filtradas
 else:
     goma_rem = np.nan
 with k1:
@@ -198,7 +203,8 @@ with k1:
 with k2:
     st.metric("Promedio Horas", f"{horas_prom:,.0f}" if pd.notna(horas_prom) else "N/D")
 with k3:
-    st.metric("% Goma Remanente", f"{goma_rem:,.1f}%" if pd.notna(goma_rem) else "N/D")
+    st.metric(" % de Goma Remanente", f"{goma_rem:.1f}%")
+
 
 st.markdown("---")
 
