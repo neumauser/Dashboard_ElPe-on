@@ -86,17 +86,17 @@ st.markdown("### Filtros")
 # --- Definición de caso ---
 case_cols = []
 with st.container():
-    cdef = st.columns(4)
-    case_def = cdef[0].selectbox(
-        "Definición de 'caso'",
-        [
-            "Filas (cada registro)",
-            "Neumáticos únicos (SERIE)",
-            "Equipos únicos (Nº INTERNO)",
-            "Único por SERIE+MOTIVO"
-        ], index=0
-    )
-    only_with_motive = cdef[1].checkbox("Solo con MOTIVO DE BAJA", value=False)
+    cdef = st.columns(2)
+    # case_def = cdef[0].selectbox(
+    #     "Definición de 'caso'",
+    #     [
+    #         "Filas (cada registro)",
+    #         "Neumáticos únicos (SERIE)",
+    #         "Equipos únicos (Nº INTERNO)",
+    #         "Único por SERIE+MOTIVO"
+    #     ], index=0
+    # )
+    # only_with_motive = cdef[1].checkbox("Solo con MOTIVO DE BAJA", value=False)
     # Mostrar la paleta actual para referencia visual en el header
     cdef[2].markdown(f"**Barra:** <span style='color:{COLORS['bar']}'>■</span>", unsafe_allow_html=True)
     cdef[3].markdown(f"**Línea:** <span style='color:{COLORS['line']}'>●</span>", unsafe_allow_html=True)
