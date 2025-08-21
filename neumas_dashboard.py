@@ -203,7 +203,8 @@ with k1:
 with k2:
     st.metric("Promedio Horas", f"{horas_prom:,.0f}" if pd.notna(horas_prom) else "N/D")
 with k3:
-    st.metric(" % de Goma Remanente", f"{goma_rem:.1f}%")
+    st.metric(" % de Goma Remanente", f"{goma_rem}%")
+    # st.metric(" % de Goma Remanente", f"{goma_rem:.1f}%")
 
 
 st.markdown("---")
@@ -319,10 +320,10 @@ with c2:
         fig2.update_xaxes(tickangle=-30)
         st.plotly_chart(fig2, use_container_width=True)
 
-# ---------- Notas ----------
-with st.expander("Diagnóstico de columnas"):
-    st.write("Columnas detectadas:", list(df.columns))
-    st.write("Filas filtradas:", len(fdf), "de", len(df))
-    for c in ["HORAS", "% GOMA REMANENTE"]:
-        if c in df.columns:
-            st.write(f"Rango de {c}:", float(df[c].min()), "→", float(df[c].max()))
+# # ---------- Notas ----------
+# with st.expander("Diagnóstico de columnas"):
+#     st.write("Columnas detectadas:", list(df.columns))
+#     st.write("Filas filtradas:", len(fdf), "de", len(df))
+#     for c in ["HORAS", "% GOMA REMANENTE"]:
+#         if c in df.columns:
+#             st.write(f"Rango de {c}:", float(df[c].min()), "→", float(df[c].max()))
