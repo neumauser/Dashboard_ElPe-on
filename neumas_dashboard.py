@@ -98,8 +98,8 @@ with st.container():
     # )
     # only_with_motive = cdef[1].checkbox("Solo con MOTIVO DE BAJA", value=False)
     # Mostrar la paleta actual para referencia visual en el header
-    cdef[2].markdown(f"**Barra:** <span style='color:{COLORS['bar']}'>■</span>", unsafe_allow_html=True)
-    cdef[3].markdown(f"**Línea:** <span style='color:{COLORS['line']}'>●</span>", unsafe_allow_html=True)
+    cdef[0].markdown(f"**Barra:** <span style='color:{COLORS['bar']}'>■</span>", unsafe_allow_html=True)
+    cdef[1].markdown(f"**Línea:** <span style='color:{COLORS['line']}'>●</span>", unsafe_allow_html=True)
 
 with st.container():
     st.markdown('<div class="filter-bar">', unsafe_allow_html=True)
