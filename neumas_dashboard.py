@@ -203,7 +203,7 @@ with k1:
 with k2:
     st.metric("Promedio Horas", f"{horas_prom:,.0f}" if pd.notna(horas_prom) else "N/D")
 with k3:
-    st.metric(" % de Goma Remanente", f"{goma_rem}%")
+    st.metric(" % de Goma Remanente", f"{goma_rem*100:.2f}%")
     # st.metric(" % de Goma Remanente", f"{goma_rem:.1f}%")
 
 
