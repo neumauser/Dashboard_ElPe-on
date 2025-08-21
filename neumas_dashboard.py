@@ -188,7 +188,11 @@ if len(mot_sel) > 0 and "MOTIVO DE BAJA" in fdf.columns:
 k1, k2, k3 = st.columns(3)
 total_bajas = len(fdf)
 horas_prom = fdf["HORAS"].mean() if "HORAS" in fdf.columns else np.nan
-goma_rem = fdf["% GOMA REMANENTE"].mean() if "% GOMA REMANENTE" in fdf.columns else np.nan
+goma_rem = fdf["% GOMA REMANENTE"].mean() 
+if "% GOMA REMANENTE" in fdf.columns and len(fdf) > 0:
+    goma_rem = fdf["% GOMA REMANENTE"].sum() / len(fdf)
+else:
+    goma_rem = np.nan
 with k1:
     st.metric("Cantidad Bajas", f"{total_bajas:,}")
 with k2:
