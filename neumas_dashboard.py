@@ -21,7 +21,7 @@ PALETTES = {
 #     default_file = "generar reportabilidad.xlsx"
 #     excel_path = st.text_input("Ruta al Excel", value=default_file)
 
-palette_name = list(PALETTES.keys())[1]
+palette_name = list(PALETTES.keys())[0]
 show_labels = True
 excel_path = "Planilla Bajas 2023-2024-2025 PEÑON (DEF).xlsx"
 
@@ -86,20 +86,20 @@ st.markdown("### Filtros")
 # --- Definición de caso ---
 case_cols = []
 with st.container():
-    cdef = st.columns(2)
-    # case_def = cdef[0].selectbox(
-    #     "Definición de 'caso'",
-    #     [
-    #         "Filas (cada registro)",
-    #         "Neumáticos únicos (SERIE)",
-    #         "Equipos únicos (Nº INTERNO)",
-    #         "Único por SERIE+MOTIVO"
-    #     ], index=0
-    # )
-    # only_with_motive = cdef[1].checkbox("Solo con MOTIVO DE BAJA", value=False)
+    cdef = st.columns(4)
+    case_def = cdef[0].selectbox(
+        "Definición de 'caso'",
+        [
+            "Filas (cada registro)",
+            "Neumáticos únicos (SERIE)",
+            "Equipos únicos (Nº INTERNO)",
+            "Único por SERIE+MOTIVO"
+        ], index=0
+    )
+    only_with_motive = cdef[1].checkbox("Solo con MOTIVO DE BAJA", value=False)
     # Mostrar la paleta actual para referencia visual en el header
-    cdef[0].markdown(f"**Barra:** <span style='color:{COLORS['bar']}'>■</span>", unsafe_allow_html=True)
-    cdef[1].markdown(f"**Línea:** <span style='color:{COLORS['line']}'>●</span>", unsafe_allow_html=True)
+    cdef[2].markdown(f"**Barra:** <span style='color:{COLORS['bar']}'>■</span>", unsafe_allow_html=True)
+    cdef[3].markdown(f"**Línea:** <span style='color:{COLORS['line']}'>●</span>", unsafe_allow_html=True)
 
 with st.container():
     st.markdown('<div class="filter-bar">', unsafe_allow_html=True)
