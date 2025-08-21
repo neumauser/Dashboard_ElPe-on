@@ -14,12 +14,16 @@ PALETTES = {
     "Plotly (Azul + Naranjo)": {"bar":"#1F77B4", "line":"#FF7F0E", "grid":"#E6E6E6", "bg":"#FFFFFF", "axes":"#333333", "text":"#111111"},
     "Escala Gris + Verde": {"bar":"#4F4F4F", "line":"#2CA02C", "grid":"#D9D9D9", "bg":"#FFFFFF", "axes":"#333333", "text":"#111111"}
 }
-with st.sidebar:
-    st.header("Opciones")
-    palette_name = st.selectbox("Paleta de colores", list(PALETTES.keys()), index=0)
-    show_labels = st.checkbox("Mostrar etiquetas de datos", value=True)
-    default_file = "generar reportabilidad.xlsx"
-    excel_path = st.text_input("Ruta al Excel", value=default_file)
+# with st.sidebar:
+#     st.header("Opciones")
+#     palette_name = st.selectbox("Paleta de colores", list(PALETTES.keys()), index=0)
+#     show_labels = st.checkbox("Mostrar etiquetas de datos", value=True)
+#     default_file = "generar reportabilidad.xlsx"
+#     excel_path = st.text_input("Ruta al Excel", value=default_file)
+
+palette_name = list(PALETTES.keys())[1]
+show_labels = True
+excel_path = "Planilla Bajas 2023-2024-2025 PEÑON (DEF).xlsx"
 
 COLORS = PALETTES[palette_name]
 
