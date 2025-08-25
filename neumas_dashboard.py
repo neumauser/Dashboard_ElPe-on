@@ -1,4 +1,3 @@
-
 import sys
 import pandas as pd
 import numpy as np
@@ -10,16 +9,10 @@ st.set_page_config(page_title="Neumas Dashboard", layout="wide")
 
 # ---------- Estilo y colores ----------
 PALETTES = {
-    "Clásica (Azul + Dorado)": {"bar":"#2F5597", "line":"#FFC000", "grid":"#E6E6E6", "bg":"#FFFFFF", "axes":"#333333", "text":"#111111"},
+    "Clásica (Azul + Dorado)": {"bar":"#FF7F0E", "line":"#1F77B4", "grid":"#E6E6E6", "bg":"#FFFFFF", "axes":"#333333", "text":"#111111"},
     "Plotly (Azul + Naranjo)": {"bar":"#1F77B4", "line":"#FF7F0E", "grid":"#E6E6E6", "bg":"#FFFFFF", "axes":"#333333", "text":"#111111"},
     "Escala Gris + Verde": {"bar":"#4F4F4F", "line":"#2CA02C", "grid":"#D9D9D9", "bg":"#FFFFFF", "axes":"#333333", "text":"#111111"}
 }
-# with st.sidebar:
-#     st.header("Opciones")
-#     palette_name = st.selectbox("Paleta de colores", list(PALETTES.keys()), index=0)
-#     show_labels = st.checkbox("Mostrar etiquetas de datos", value=True)
-#     default_file = "generar reportabilidad.xlsx"
-#     excel_path = st.text_input("Ruta al Excel", value=default_file)
 
 palette_name = list(PALETTES.keys())[0]
 show_labels = True
@@ -190,12 +183,11 @@ total_bajas = len(fdf)
 horas_prom = fdf["HORAS"].mean() if "HORAS" in fdf.columns else np.nan
 goma_rem = fdf["% GOMA REMANENTE"].mean() 
 if "% GOMA REMANENTE" in fdf.columns and len(fdf) > 0:
-    # convertir a número (quita % y transforma en decimal si es texto)
     vals = pd.to_numeric(
         fdf["% GOMA REMANENTE"].astype(str).str.replace("%", "").str.strip(),
         errors="coerce"
     )
-    goma_rem = vals.sum() / len(fdf)   # suma / total filas filtradas
+    goma_rem = vals.sum() / len(fdf)
 else:
     goma_rem = np.nan
 with k1:
@@ -204,8 +196,6 @@ with k2:
     st.metric("Promedio Horas", f"{horas_prom:,.0f}" if pd.notna(horas_prom) else "N/D")
 with k3:
     st.metric(" % de Goma Remanente", f"{goma_rem*100:.2f}%")
-    # st.metric(" % de Goma Remanente", f"{goma_rem:.1f}%")
-
 
 st.markdown("---")
 
@@ -248,36 +238,67 @@ if "MOTIVO DE BAJA" in fdf.columns:
 else:
     g2 = pd.DataFrame(columns=["nro_casos","prom_hrs"])
 
+# ---------- Helper: etiquetas de barras en la base ----------
+def add_bar_base_labels(fig, x_vals, y_vals, labels, xaxis="x", yaxis="y", yshift=8):
+    """
+    Coloca etiquetas de barras en y=0 (parte inferior) con fuente gruesa y alto contraste.
+    """
+    for xv, yv, text in zip(x_vals, y_vals, labels):
+        if text == "" or (not np.isfinite(yv)):
+            continue
+        fig.add_annotation(
+            x=xv, y=0,
+            xref=xaxis, yref=yaxis,
+            text=text,
+            showarrow=False,
+            yshift=yshift,  # leve desplazamiento hacia arriba desde la base
+            font=dict(family="Arial Black", size=11, color="black"),
+            # bgcolor="rgba(255, 255, 255, 0.8)",
+            # bordercolor="rgba(255, 255, 255, 0.8)",
+            textangle=-35,
+            opacity=0.95
+        )
+
 # ---------- Crear figuras ----------
 def make_combined_bar_line(x, y_bar, y_line, x_labels=None, height=460):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    x_plot = x_labels if x_labels is not None else x
+
+    # Barras (sin textposition; usaremos anotaciones en la base)
     fig.add_trace(
         go.Bar(
-            x=x_labels if x_labels is not None else x,
+            x=x_plot,
             y=y_bar,
             name="Nro de Casos",
             marker_color=COLORS['bar'],
             marker_line=dict(width=0),
-            text=[f"{int(v):,}" if not np.isnan(v) else "" for v in y_bar],
-            textposition="outside" if show_labels else "none",
-            textfont=dict(color=COLORS['text'])
+            hovertemplate="Nro de Casos: %{y}<extra></extra>",
         ),
         secondary_y=False
     )
+
+    # Línea (con etiquetas en cada punto)
     fig.add_trace(
         go.Scatter(
-            x=x_labels if x_labels is not None else x,
+            x=x_plot,
             y=y_line,
             name="Promedio Hrs acum.",
-            line=dict(color=COLORS['line'], width=3),
-            marker=dict(size=8, color=COLORS['line']),
-            mode="lines+markers" if not show_labels else "lines+markers+text",
-            text=[f"{v:,.0f}" if not np.isnan(v) else "" for v in y_line],
+            mode="lines+markers+text" if show_labels else "lines+markers",
+            text=[f"{v:,.0f}" if np.isfinite(v) else "" for v in y_line],
             textposition="top center",
-            textfont=dict(color=COLORS['text'])
+            textfont=dict(family="Arial Black", size=12, color="black"),
+            line=dict(color=COLORS['line'], width=3, shape="spline", smoothing=0.6),
+            marker=dict(size=10, color=COLORS['line'], line=dict(width=3, color="white")),
+            hovertemplate="Prom. Hrs: %{y:,.0f}<extra></extra>",
         ),
         secondary_y=True
     )
+
+    # Etiquetas en la base de las barras
+    if show_labels:
+        bar_labels = [f"{int(v):,}" if np.isfinite(v) else "" for v in y_bar]
+        add_bar_base_labels(fig, x_plot, y_bar, bar_labels, xaxis="x", yaxis="y", yshift=8)
+
     fig.update_layout(
         plot_bgcolor=COLORS['bg'],
         paper_bgcolor=COLORS['bg'],
@@ -316,14 +337,7 @@ with c2:
             x_labels=g2.index,
             height=520
         )
-        fig2.update_layout(margin=dict(l=20, r=20, t=20, b=80))
+        # Si los números siguen quedando muy juntos, separa más las barras:
+        fig2.update_layout(bargap=0.45, bargroupgap=0.25, margin=dict(l=20, r=20, t=20, b=80))
         fig2.update_xaxes(tickangle=-30)
         st.plotly_chart(fig2, use_container_width=True)
-
-# # ---------- Notas ----------
-# with st.expander("Diagnóstico de columnas"):
-#     st.write("Columnas detectadas:", list(df.columns))
-#     st.write("Filas filtradas:", len(fdf), "de", len(df))
-#     for c in ["HORAS", "% GOMA REMANENTE"]:
-#         if c in df.columns:
-#             st.write(f"Rango de {c}:", float(df[c].min()), "→", float(df[c].max()))
