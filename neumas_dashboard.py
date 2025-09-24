@@ -26,7 +26,24 @@ def load_data(path: str) -> pd.DataFrame:
     df = pd.read_excel(path, sheet_name=0)
     # Normalización de nombres
     df.columns = [str(c).strip().upper() for c in df.columns]
-    # Tipos
+    
+    # CORRECCIÓN MÁS CONSERVADORA: Solo limpiar columnas de texto sin convertir números
+    for col in df.columns:
+        if df[col].dtype == 'object':  # Solo para columnas de texto
+            # Preservar valores NaN reales
+            mask_notna = df[col].notna()
+            if mask_notna.any():
+                # Solo procesar valores no nulos
+                df.loc[mask_notna, col] = df.loc[mask_notna, col].astype(str).str.strip()
+                # Eliminar caracteres de espacio no visibles
+                df.loc[mask_notna, col] = df.loc[mask_notna, col].str.replace('\xa0', ' ', regex=False)
+                df.loc[mask_notna, col] = df.loc[mask_notna, col].str.replace('\u200B', '', regex=False)
+                # Normalizar múltiples espacios a uno solo
+                df.loc[mask_notna, col] = df.loc[mask_notna, col].str.replace(r'\s+', ' ', regex=True)
+                # Volver a convertir strings vacíos o 'nan' a NaN
+                df.loc[df[col].isin(['', 'nan', 'None']), col] = np.nan
+    
+    # Tipos de datos (sin cambios)
     for col in ["FECHA", "MES"]:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce")
@@ -50,7 +67,35 @@ if df.empty:
 
 # ---------- Helpers ----------
 def safe_unique(series):
-    return sorted([x for x in series.dropna().unique().tolist() if x != "" and x is not None])
+    """Función mejorada para obtener valores únicos sin duplicados"""
+    if series is None or len(series) == 0:
+        return []
+    
+    # Limpiar solo valores no nulos y mantener tipos originales
+    valid_series = series.dropna()
+    if len(valid_series) == 0:
+        return []
+    
+    # Si es una serie de texto, limpiar espacios
+    if valid_series.dtype == 'object':
+        cleaned = valid_series.astype(str).str.strip()
+        # Eliminar valores vacíos después del strip
+        cleaned = cleaned[cleaned != '']
+        cleaned = cleaned[cleaned.str.lower() != 'nan']
+    else:
+        cleaned = valid_series
+    
+    # Obtener únicos y ordenar
+    unique_vals = sorted(cleaned.unique().tolist())
+    
+    # DEBUG: Solo mostrar cuando hay problemas potenciales
+    if hasattr(series, 'name') and series.name == 'MOTIVO DE BAJA':
+        if len(unique_vals) != len(set(unique_vals)):  # Solo si hay duplicados reales
+            st.sidebar.write("⚠️ DEBUG - Posibles duplicados en MOTIVO DE BAJA:")
+            for i, val in enumerate(unique_vals):
+                st.sidebar.write(f"{i+1}. '{val}'")
+    
+    return unique_vals
 
 def month_name(m):
     try:
@@ -148,7 +193,7 @@ def get_case_group(df_in: pd.DataFrame) -> pd.Series:
     if case_def == 'Neumáticos únicos (SERIE)' and 'SERIE' in df_in.columns:
         return df_in['SERIE']
     if case_def == 'Equipos únicos (Nº INTERNO)':
-        for col in ['Nº INTERNO','N° INTERNO','NO INTERNO','NUMERO INTERNO','Nº INTERNO']:
+        for col in ['Nº INTERNO','N° INTERNO','NO INTERNO','NUMERO INTERNO','Nº INTERNO']:
             if col in df_in.columns:
                 return df_in[col]
         return pd.Series(range(len(df_in)), index=df_in.index)
